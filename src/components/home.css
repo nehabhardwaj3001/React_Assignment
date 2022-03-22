@@ -1,0 +1,79 @@
+
+.name{
+    text-align: center;
+    background:aqua;
+    font-size: xx-large;
+    margin: 5px;
+
+}
+
+.box {
+    text-align: left;
+    border: black ridge 1px;
+    border-radius: 10px;
+    margin: 20px 50px;
+    width: 20rem;
+    padding: 10px;
+  }
+
+  button{
+    background-color: red;
+    border: none;
+    color: white;
+    padding: 10px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius:20px;
+  }
+
+  .blue{
+    background-color: #0a0a23;
+  }
+
+  input[type=text] {
+    width: 50%;
+    padding: 12px 20px;
+    margin: 8px 10px;
+    box-sizing: border-box;
+    border: none;
+    background-color: #3CBC8D;
+    color: white;
+  }
+
+  .left{
+      margin-left: 100px;
+    text-align: left;
+  }
+
+  .details{
+    width: 100%;
+    float: right;
+    text-align: left;
+    border: black ridge 1px;
+    border-radius: 10px;
+    margin: 10px 50px;
+    width: 20rem;
+    padding: 10px;
+  }
+  .wallet{
+    width: 100%;
+    float: right;
+    text-align: left;
+    border: rgb(238, 10, 10) ridge 4px;
+    border-radius: 10px;
+    margin: 10px 50px;
+    width: 20rem;
+    padding: 10px;
+    background-color:bisque;
+  }
+  p::first-letter {
+    font-size: 150%;
+    color: #8A2BE2;
+  }
+  span{
+      font-weight: bold;
+  }
