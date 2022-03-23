@@ -4,12 +4,17 @@ import "./home.css"
 
 function Home() {
     const bestMatches = []
-    // const name="2. name"
+    let stockWallet = ["IBM", "IBMM"];
+    
     const [term, setTerm] = useState('');
     const [info, setInfo] = useState({ bestMatches: [] });
     const [info1, setInfo1] = useState({});
     const [stock, setStock] = useState([]);
     const [display, setDisplay] = useState("none");
+    const [sellQuantity, setSellQuantity] = useState(0);
+    const [buyQuantity, setBuyQuantity] = useState(0);
+    const [totalQuantity, setTotalQuantity] = useState(0);
+    const [amount, setAmount] = useState(1000);
 
     const handleSubmit = () => {
         axios.get(`https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${term}&apikey=0SL0DBPBVUIXHD42`)
@@ -32,6 +37,31 @@ function Home() {
         console.log("handle detail",data);
     }
 
+    const storeData = (symbolName) => {
+        axios.post( 'http://localhost:5000/api/stockList',  {Symbol: symbolName},
+        {
+            headers: {
+                'Access-Control-Allow-Origin' : '*'
+            }
+          }).then((response) => { 
+              getData();
+            console.log(response)
+        })
+    }
+
+    const getData = () => {
+        axios.get( 'http://localhost:5000/api/stockList',
+        {
+            headers: {
+                'Access-Control-Allow-Origin' : '*'
+            }
+          }).then((response) => {
+            stockWallet = response.data;
+            console.log(response)
+            console.log("data in stock ", stockWallet);
+        })
+    }
+
     return (
         <div>
             <input type='text' placeholder="IBM" onChange={(e) => setTerm(e.target.value)} />
@@ -46,10 +76,42 @@ function Home() {
                    <p><span>Description : </span> {info1.Description}</p>
                 </div>
                 <div className="wallet">
+                   
                     <h2>Stock List</h2>
-               {/* {stock.forEach(element => <p>{element} </p>)} */}
-               <p>stock1</p>
-               <p>stock2</p>
+                    <div className="balanceBox">
+                    <h3>wallet Balance :<span className="red">{amount}</span>  </h3>
+                    <h3>Stock Quantity :<span className="red"> {totalQuantity} </span></h3>
+                    {/* <h3>Buy Quantity : <span className="red"> {buyQuantity} </span></h3> */}
+                    <h3>Sell Quantity : <span className="red"> {sellQuantity} </span></h3>
+                    </div>
+                    <input type="number"  onChange={(e) => setSellQuantity(e.target.value)
+                        } placeholder="Enter quantity..." />
+               <div>
+               {stockWallet.map((element, index) => <li>
+                   {element}
+                    {<button className="green" onClick={() =>{
+                        setTotalQuantity(parseInt(totalQuantity) - parseInt(sellQuantity));
+                        setAmount(amount + 10*sellQuantity);
+                        // setSellQuantity()
+                        alert('${element} sold, amount credited to wallet...')
+                    }}>Sell stock</button>}
+                     </li> 
+               
+               )
+                 
+               }
+               <li> WIPRO {<button className="green" onClick={() =>{
+                        setTotalQuantity(parseInt(totalQuantity) - parseInt(sellQuantity));
+                        setAmount(amount + 10*sellQuantity);
+                        alert('${element} sold, amount credited to wallet...')
+                    }}>Sell stock</button>} </li>
+              
+               <li> TCS{<button className="green" onClick={() =>{
+                        setTotalQuantity(parseInt(totalQuantity) - parseInt(sellQuantity));
+                        setAmount(amount + 10*sellQuantity);
+                        alert('${element} sold, amount credited to wallet...')
+                    }}>Sell stock</button>} </li>
+               </div>
                 </div>
                 {info.bestMatches.map((infos, index) => (
                     <div className="box" key={index}>
@@ -65,7 +127,14 @@ function Home() {
                         <div>{infos["7. timezone"]}</div>
                         <div>{infos["8. currency"]}</div>
                         <div>{infos["9. matchScore"]}</div>
-                        <button className="blue" style={{"display":display}} onClick={() =>{setStock([...stock, infos["1. symbol"]]);console.log(stock);
+                        <input type="number" style={{"display":display}} onChange={(e) => setBuyQuantity(e.target.value)
+                        } placeholder="Enter quantity..." />
+                        <button className="blue" style={{"display":display}} onClick={() =>{
+                            setStock([...stock, infos["1. symbol"]]);
+                            setTotalQuantity(parseInt(totalQuantity) + parseInt(buyQuantity));
+                            setAmount(amount - 10*buyQuantity);
+                        console.log(stock);
+                        storeData(infos["1. symbol"])
                         alert( `${infos["1. symbol"]} added to Stock wallet...`)}}>add to stock</button>
                     </div>
                     
