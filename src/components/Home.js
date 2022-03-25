@@ -4,8 +4,8 @@ import "./home.css"
 
 function Home() {
     const bestMatches = []
-    let stockWallet = ["IBM", "IBMM"];
-    
+    // let stockWallet = ["IBM", "IBMM"];
+    const [wallet, setWallet] = useState([{Symbol: "neha"}, {Symbol: "kunal"}]);
     const [term, setTerm] = useState('');
     const [info, setInfo] = useState({ bestMatches: [] });
     const [info1, setInfo1] = useState({});
@@ -15,6 +15,7 @@ function Home() {
     const [buyQuantity, setBuyQuantity] = useState(0);
     const [totalQuantity, setTotalQuantity] = useState(0);
     const [amount, setAmount] = useState(1000);
+    const [price, setPrice] = useState(0.00) ;
 
     const handleSubmit = () => {
         axios.get(`https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${term}&apikey=0SL0DBPBVUIXHD42`)
@@ -37,6 +38,18 @@ function Home() {
         console.log("handle detail",data);
     }
 
+    const stockPrice = (symbol) => {
+        axios.get(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=0SL0DBPBVUIXHD42`)
+        .then(res => {
+            // return res["Global Quote"].["05. price"];
+            console.log("welcome", res.data["Global Quote"]["05. price"]);
+            setPrice(res.data["Global Quote"]["05. price"]) ;
+        }
+        )
+
+        console.log("stock price",price);
+    }
+
     const storeData = (symbolName) => {
         axios.post( 'http://localhost:5000/api/stockList',  {Symbol: symbolName},
         {
@@ -56,16 +69,31 @@ function Home() {
                 'Access-Control-Allow-Origin' : '*'
             }
           }).then((response) => {
-            stockWallet = response.data;
+            setWallet(response.data);
             console.log(response)
-            console.log("data in stock ", stockWallet);
+            console.log("data in stock ", wallet);
         })
     }
+
+    // getData();  //to fetch data in database of stock bought previously on loading of page
+
+    const deleteSellQuantity = (symbolName) =>{
+        axios.delete( 'http://localhost:5000/api/stockList',  {Symbol: symbolName},
+        {
+            headers: {
+                'Access-Control-Allow-Origin' : '*'
+            }
+          }).then((response) => { 
+              getData();
+            console.log(response)
+        })   
+    }
+
 
     return (
         <div>
             <input type='text' placeholder="IBM" onChange={(e) => setTerm(e.target.value)} />
-            <button onClick={handleSubmit}>submit</button>
+            <button className="button" onClick={handleSubmit}>submit</button>
             {
             info.bestMatches.length > 0 ? <div>
                 <h2 className="left">Search Results &#8595;</h2>
@@ -82,25 +110,27 @@ function Home() {
                     <h3>wallet Balance :<span className="red">{amount}</span>  </h3>
                     <h3>Stock Quantity :<span className="red"> {totalQuantity} </span></h3>
                     {/* <h3>Buy Quantity : <span className="red"> {buyQuantity} </span></h3> */}
-                    <h3>Sell Quantity : <span className="red"> {sellQuantity} </span></h3>
+                    {/* <h3>Sell Quantity : <span className="red"> {sellQuantity} </span></h3> */}
                     </div>
                     <input type="number"  onChange={(e) => setSellQuantity(e.target.value)
                         } placeholder="Enter quantity..." />
                <div>
-               {stockWallet.map((element, index) => <li>
-                   {element}
+               {wallet.map((element, index) => <li>
+                   {element.Symbol }
                     {<button className="green" onClick={() =>{
+                        stockPrice(element["1. symbol"]);         
                         setTotalQuantity(parseInt(totalQuantity) - parseInt(sellQuantity));
-                        setAmount(amount + 10*sellQuantity);
-                        // setSellQuantity()
-                        alert('${element} sold, amount credited to wallet...')
+                        setAmount(amount + price*sellQuantity);
+                     deleteSellQuantity(element.Symbol);
+                        alert(`${element} sold, ${price} amount credited to wallet...`)
+                        setPrice(0);
                     }}>Sell stock</button>}
                      </li> 
                
                )
                  
                }
-               <li> WIPRO {<button className="green" onClick={() =>{
+               {/* <li> WIPRO {<button className="green" onClick={() =>{
                         setTotalQuantity(parseInt(totalQuantity) - parseInt(sellQuantity));
                         setAmount(amount + 10*sellQuantity);
                         alert('${element} sold, amount credited to wallet...')
@@ -110,7 +140,7 @@ function Home() {
                         setTotalQuantity(parseInt(totalQuantity) - parseInt(sellQuantity));
                         setAmount(amount + 10*sellQuantity);
                         alert('${element} sold, amount credited to wallet...')
-                    }}>Sell stock</button>} </li>
+                    }}>Sell stock</button>} </li> */}
                </div>
                 </div>
                 {info.bestMatches.map((infos, index) => (
@@ -129,13 +159,17 @@ function Home() {
                         <div>{infos["9. matchScore"]}</div>
                         <input type="number" style={{"display":display}} onChange={(e) => setBuyQuantity(e.target.value)
                         } placeholder="Enter quantity..." />
-                        <button className="blue" style={{"display":display}} onClick={() =>{
+                        <button className="blue button" style={{"display":display}} onClick={() =>{
                             setStock([...stock, infos["1. symbol"]]);
+                            stockPrice(infos["1. symbol"]);
                             setTotalQuantity(parseInt(totalQuantity) + parseInt(buyQuantity));
-                            setAmount(amount - 10*buyQuantity);
+                            setAmount(amount - price*buyQuantity);
+
                         console.log(stock);
                         storeData(infos["1. symbol"])
-                        alert( `${infos["1. symbol"]} added to Stock wallet...`)}}>add to stock</button>
+                        alert( `${infos["1. symbol"]} bought,  ${price} deducted to wallet...`)
+                        setPrice(0);
+                        }}>add to stock</button>
                     </div>
                     
                 ))}
