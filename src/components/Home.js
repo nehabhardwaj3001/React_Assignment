@@ -92,7 +92,7 @@ function Home() {
 
     return (
         <div>
-            <input type='text' placeholder="IBM" onChange={(e) => setTerm(e.target.value)} />
+            <input className='input-box' type='text' placeholder="IBM" onChange={(e) => setTerm(e.target.value)} />
             <button className="button" onClick={handleSubmit}>submit</button>
             {
             info.bestMatches.length > 0 ? <div>
